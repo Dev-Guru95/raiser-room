@@ -1,0 +1,43 @@
+# Host-specific additions to `compose.yaml`. Copy to the repository root as
+# `compose.override.yaml` — compose reads that filename with no flag.
+#
+# WHY THIS EXISTS RATHER THAN AN EDIT TO compose.yaml
+#
+# `compose.yaml` describes the product: one process, SQLite on a volume, files
+# on a volume. It is deliberate and it should stay readable as a statement of
+# that shape. Where the files sit on YOUR machine is not part of that shape, so
+# it lives here, which is also the file you can change without a diff against
+# the repository.
+#
+# WHY A BIND MOUNT RATHER THAN THE NAMED VOLUME
+#
+# A named volume is simpler right up to the moment something outside the
+# container needs the files, and three things do: the nightly backup, the disk
+# check, and Litestream streaming the write-ahead log off the box. With a named
+# volume each of those has to reach into `/var/lib/docker/volumes/…`, which is
+# an implementation detail of Docker that nothing should depend on and that a
+# `docker system prune` is entitled to rearrange.
+#
+# A path you chose is a path you can back up, check and stream.
+#
+# CHECK THE MERGE, DO NOT ASSUME IT
+#
+# Compose merges service `volumes` by mount target, so the bind below replaces
+# the named volume at `/data` rather than fighting with it. Confirm it on your
+# version before relying on it:
+#
+#   docker compose config | grep -A4 volumes
+#
+# You want to see the bind to /srv/raiseroom/data and no mention of the named
+# volume. If you see both, put the bind directly into `compose.yaml` instead.
+
+services:
+  app:
+    volumes:
+      # The product's whole state. 50 GB or more, on something you back up.
+      - /srv/raiseroom/data:/data
+      # Where the nightly backup writes. Deliberately NOT under /data: a backup
+      # on the volume it is backing up fills the volume it is protecting, and
+      # the disk alert at 80% then fires because of the thing that exists to
+      # make the disk safe.
+      - /srv/raiseroom/backups:/backups

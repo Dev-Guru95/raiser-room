@@ -1,0 +1,69 @@
+# TLS in front of RaiseRoom.
+#
+#   sudo cp deploy/Caddyfile /etc/caddy/Caddyfile
+#   sudo systemctl reload caddy
+#
+# Caddy rather than nginx for one reason: certificates. It gets and renews them
+# from Let's Encrypt with no cron job, no certbot and nothing to forget in
+# ninety days. An expired certificate on a product whose session cookie is
+# marked Secure is a total outage, and it is the commonest self-inflicted one.
+#
+# WHAT THIS FILE DELIBERATELY DOES NOT DO
+#
+# It sets no security headers. The application sets its own — content security
+# policy, HSTS, frame refusal, referrer policy — and a proxy that sets them too
+# produces two of each, which browsers resolve in ways that are tedious to
+# predict. `test/web.test.js` holds the application to the policy it serves; a
+# header added here is outside that test and will drift away from it.
+#
+# It also does not serve or cache anything. Fonts come from the application on
+# purpose: a font fetched from a CDN tells that CDN who is reading a diligence
+# file and when.
+
+raiseroom.app {
+	# The application listens on loopback only — see the ports line in
+	# compose.yaml. This is the only thing that reaches it.
+	reverse_proxy 127.0.0.1:8080 {
+		# Caddy sets X-Forwarded-For and X-Forwarded-Proto by default, which is
+		# what makes TRUST_PROXY=1 correct in .env — and what makes it dangerous
+		# without something like this in front. See docs/DEPLOY.md.
+		#
+		# Generating a document is CPU-bound and can take a while on a large
+		# company. The default of 0 (no timeout) would hang a client forever on a
+		# wedged request; two minutes is longer than the slowest real generation
+		# and shorter than a person's patience.
+		transport http {
+			response_header_timeout 120s
+		}
+	}
+
+	# The application refuses anything over 100 MB itself, with a message that
+	# names the limit (`src/api/service.js`). Matching it here means a 2 GB
+	# upload is cut off at the edge instead of crossing the network to be
+	# refused — and NOT exceeding it means the refusal a user sees is the
+	# application's sentence rather than a bare 413 from a proxy.
+	request_body {
+		max_size 100MB
+	}
+
+	encode zstd gzip
+
+	# One line per request, in JSON, to a file a log shipper can follow. The
+	# handover asks for logs somewhere searchable and matchable by the error
+	# reference the application prints; this is the access half of that.
+	log {
+		output file /var/log/caddy/raiseroom.access.log {
+			roll_size 100MiB
+			roll_keep 14
+		}
+		format json
+	}
+}
+
+# If you also own www.raiseroom.app, redirect it rather than serving both: two
+# origins mean two cookie scopes and two sets of share links, and a counterparty
+# holding a link to the wrong one gets a sign-in page.
+#
+# www.raiseroom.app {
+# 	redir https://raiseroom.app{uri} permanent
+# }

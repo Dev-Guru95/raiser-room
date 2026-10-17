@@ -1,0 +1,19 @@
+# Every minute.
+#
+# The check is three HTTP requests and a statfs, so a minute costs nothing and
+# is the difference between hearing about an outage in one minute or in fifteen.
+#
+# No Persistent= here, unlike the backup: a check that was missed while the host
+# was down has nothing useful to say about a minute that has passed.
+
+[Unit]
+Description=Run the RaiseRoom check every minute
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=1min
+AccuracySec=10s
+Unit=raiseroom-watch.service
+
+[Install]
+WantedBy=timers.target

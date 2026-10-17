@@ -1,0 +1,36 @@
+# The health, degraded-storage and disk check.
+#
+# Run from the HOST against the public URL, not from inside the container. That
+# is the point: a check against `http://127.0.0.1:8080` passes while TLS is
+# expired, while Caddy is misconfigured, and while DNS points somewhere else.
+# A check against https://raiseroom.app exercises everything a customer does.
+#
+# The state file is what makes "non-200 twice in a row" possible — a single
+# failed probe during a deploy is not an outage, and an alert that fires on one
+# gets muted, after which it is not an alert.
+
+[Unit]
+Description=RaiseRoom health, storage and disk check
+Documentation=file:///srv/raiseroom/app/deploy/README.md
+After=network-online.target
+OnFailure=raiseroom-alert@%n.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/srv/raiseroom/app
+ExecStart=/usr/bin/node --experimental-sqlite tools/watch.mjs \
+  --url https://raiseroom.app \
+  --data-dir /srv/raiseroom/data \
+  --state /var/lib/raiseroom/watch-state.json
+
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=60
+
+# The state file lives outside /data deliberately: the disk check reads /data,
+# and a check that writes to the volume it is checking is a check that can fill
+# it. StateDirectory creates /var/lib/raiseroom with the right ownership.
+StateDirectory=raiseroom
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,6 @@
+tools/.mutate-inflight.json
+
+# Runtime state, not source: the demonstration database and the generated
+# documents that go with it. Both are rebuilt by DEMO_SEED=1 on an empty
+# database, and a 5 MB worked example in git is 5 MB in every clone forever.
+var/

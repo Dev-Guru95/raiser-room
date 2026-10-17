@@ -1,0 +1,45 @@
+# Running RaiseRoom on one machine.
+#
+#   cp .env.example .env     # then fill in STORAGE_SECRET
+#   docker compose up -d
+#
+# This is the shape the product is built for today: one process, SQLite on a
+# volume, files on a volume. It is a deliberate choice rather than a stepping
+# stone — a product with a handful of customers served from one box with a
+# nightly backup is simpler to operate and easier to reason about than three of
+# anything.
+#
+# WHEN TO STOP USING THIS
+#
+# Two things force a change, and neither is traffic:
+#
+#   1. More than one application instance. SQLite is a file, and two processes
+#      writing it over a network filesystem corrupt it. The rate limiter is also
+#      per process, so two instances give an attacker twice the budget.
+#   2. A need to restore to a point in time rather than to last night.
+#
+# Both are the Postgres adapter, which replaces src/db/sqlite.js and nothing
+# else. See docs/DEPLOY.md.
+
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      PORT: "8080"
+      # Set this to 1 ONLY if something is terminating TLS in front of this
+      # container. With nothing in front, X-Forwarded-For comes from the caller,
+      # and believing it lets them choose their own rate-limit bucket.
+      TRUST_PROXY: "1"
+    volumes:
+      - data:/data
+    ports:
+      # Bound to localhost. Whatever terminates TLS reaches it here; nothing
+      # else should. Publishing 8080 on 0.0.0.0 would put a product that sets
+      # Secure cookies behind TLS on the open internet without any.
+      - "127.0.0.1:8080:8080"
+
+volumes:
+  data:

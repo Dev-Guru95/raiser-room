@@ -1,0 +1,42 @@
+# The thing that wakes somebody.
+#
+# A templated unit, named with the unit that failed: both timers declare
+# `OnFailure=raiseroom-alert@%n.service`, so this is started with %i set to
+# `raiseroom-backup.service` or `raiseroom-watch.service`.
+#
+# WHY THIS IS A WEBHOOK AND NOT AN EMAIL
+#
+# Email from a host needs an MTA, a sending domain and a reputation, which is
+# the same work as item 4.3 of the checklist and a poor use of it: an alert that
+# arrives in a spam folder is not an alert. A webhook needs one URL.
+#
+# ────────────────────────────────────────────────────────────────────────────
+# BEFORE THIS DOES ANYTHING, IT NEEDS A URL
+#
+#   sudo mkdir -p /etc/raiseroom
+#   sudo install -m 600 /dev/null /etc/raiseroom/alert.env
+#   echo 'ALERT_WEBHOOK=https://hooks.slack.com/services/…' | sudo tee -a /etc/raiseroom/alert.env
+#
+# 600 because a Slack webhook URL is a credential: anybody holding it can post
+# into that channel.
+#
+# Until the file exists, this unit fails and says so in the journal, which is
+# the honest failure mode. The alternative — succeeding while sending nothing —
+# is how a deployment comes to believe it has monitoring.
+
+[Unit]
+Description=Post a RaiseRoom alert for %i
+After=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/raiseroom/alert.env
+
+# The script builds the JSON, for the reason written in its header: escaping log
+# output inside an ExecStart= line is two layers of quoting over text nobody
+# controls, in the script that has to work on the worst night of the year.
+ExecStart=/srv/raiseroom/app/deploy/alert.sh %i
+
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=60

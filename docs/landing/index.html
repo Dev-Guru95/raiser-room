@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RaiseRoom</title>
+<meta name="description" content="Investor readiness, your data room, and proof behind every number — in one place, before anybody asks.">
+<style>
+/* ──────────────────────────────────────────────────────────────────────────
+   THE FONTS ARE SERVED FROM HERE, NOT FROM GOOGLE
+
+   This page previously pulled four families from fonts.googleapis.com. Every
+   one of them is already in this repository and already served by the
+   application at /assets/fonts/, so the third-party request bought nothing —
+   and cost something.
+
+   What it cost: a visitor's IP address and user agent, handed to Google by the
+   first page of a product whose entire argument is that a company's
+   information stays where they put it. The privacy policy names every
+   sub-processor that receives anything; a font CDN on the landing page is a
+   recipient nobody listed. German courts have found exactly this arrangement
+   unlawful, and the policy's own note argues for EU hosting.
+
+   It also cost the content-security policy. The application sends
+   `default-src 'self'` with `font-src 'self' data:`, so serving this page
+   through the app with those links would have left a reader looking at
+   fallback fonts and a console full of blocked requests — a failure that
+   looks like a design mistake rather than a policy working.
+
+   Weights available are the ones in tools/fonts/. Source Code Pro 600 and
+   Cinzel 400 are not there; the browser synthesises them, which for a
+   source line and a wordmark is invisible.
+   ────────────────────────────────────────────────────────────────────────── */
+@font-face{font-family:'Cinzel';src:url('/assets/fonts/Cinzel-Bold.ttf') format('truetype');font-weight:700;font-display:swap}
+@font-face{font-family:'Lora';src:url('/assets/fonts/Lora.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Lora';src:url('/assets/fonts/Lora-Bold.ttf') format('truetype');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'Lora';src:url('/assets/fonts/Lora-Italic.ttf') format('truetype');font-weight:400;font-style:italic;font-display:swap}
+@font-face{font-family:'Raleway';src:url('/assets/fonts/Raleway-Light.ttf') format('truetype');font-weight:300;font-display:swap}
+@font-face{font-family:'Raleway';src:url('/assets/fonts/Raleway-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:'Raleway';src:url('/assets/fonts/Raleway-Bold.ttf') format('truetype');font-weight:700;font-display:swap}
+@font-face{font-family:'Source Code Pro';src:url('/assets/fonts/SourceCodePro-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   RaiseRoom — landing page.
+
+   THE ONE DEVICE THIS PAGE IS BUILT ON
+
+   Every claim carries a source line underneath it, set small, in Source Code
+   Pro, behind a purple rule — exactly the way a figure is shown inside the
+   product itself.
+
+   It is not decoration. The product's whole argument is that a number without
+   its provenance is not worth printing, and a landing page for that product
+   which makes bare assertions is arguing against itself. So the page holds
+   itself to its own standard: where a claim comes from the software, the line
+   names the file or the test that enforces it; where it comes from a document,
+   the line names the document.
+
+   It also does something no amount of adjectives would: it shows a visitor what
+   using the product feels like before they have signed up for anything.
+   ────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --onyx: #000000;
+  --arctic: #FFFFFF;
+  --blade: #7E3FF2;
+  --steel: #B0B0B0;
+
+  --ink: var(--arctic);
+  --ground: var(--onyx);
+  --quiet: var(--steel);
+  /* One step off pure black for the few surfaces that need separating, rather
+     than a card with a shadow under it. */
+  --raised: #0C0C0E;
+  --hairline: #26262B;
+
+  --measure: 34rem;
+  --gutter: clamp(1rem, 5vw, 6rem);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font: 300 clamp(1rem, 0.96rem + 0.2vw, 1.125rem)/1.65 Raleway, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { font-weight: 700; margin: 0; text-wrap: balance; }
+
+h1 {
+  font-family: Cinzel, Georgia, serif;
+  font-size: clamp(2.2rem, 1.1rem + 4.6vw, 4.6rem);
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-family: Lora, Georgia, serif;
+  font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.25rem);
+  line-height: 1.18;
+}
+
+h3 {
+  font-family: Lora, Georgia, serif;
+  font-size: 1.1rem;
+  line-height: 1.3;
+}
+
+p { margin: 0 0 1.1em; max-width: var(--measure); }
+a { color: inherit; }
+
+:focus-visible {
+  outline: 2px solid var(--blade);
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+
+.skip {
+  position: absolute; left: -9999px;
+  background: var(--blade); color: var(--arctic);
+  padding: .6rem 1rem; z-index: 10;
+}
+.skip:focus { left: var(--gutter); top: .5rem; }
+
+/* ── layout ─────────────────────────────────────────────────────────────── */
+
+.wrap { padding-inline: var(--gutter); }
+
+section { padding-block: clamp(3.5rem, 8vw, 7rem); }
+section + section { border-top: 1px solid var(--hairline); }
+
+.lede { font-size: 1.15em; color: var(--ink); max-width: 38rem; }
+.quiet { color: var(--quiet); }
+
+/* ── the source line: the page's one structural device ──────────────────── */
+
+.src {
+  font-family: 'Source Code Pro', ui-monospace, monospace;
+  font-size: .7rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--quiet);
+  border-left: 2px solid var(--blade);
+  padding-left: .7rem;
+  margin: 1.1rem 0 0;
+  max-width: 30rem;
+}
+.src b { font-weight: 600; color: #D8D8DE; }
+
+/* ── hero ───────────────────────────────────────────────────────────────── */
+
+.hero { padding-block: clamp(4rem, 11vw, 9rem) clamp(3.5rem, 8vw, 7rem); }
+.hero h1 { max-width: 15ch; }
+.hero .lede { margin-top: 1.6rem; }
+
+.wordmark {
+  font-family: Cinzel, Georgia, serif;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: .14em;
+  display: block;
+  margin-bottom: clamp(2.5rem, 7vw, 5rem);
+}
+
+/* The figure card. The single most characteristic object in the product:
+   a number that arrives with its evidence attached. */
+.figure {
+  margin: 2.8rem 0 0;
+  padding: 1.4rem 1.6rem;
+  background: var(--raised);
+  border: 1px solid var(--hairline);
+  border-left: 3px solid var(--blade);
+  max-width: 27rem;
+}
+.figure-label {
+  font-family: 'Source Code Pro', ui-monospace, monospace;
+  font-size: .68rem; letter-spacing: .08em; color: var(--quiet);
+  display: block;
+}
+.figure-value {
+  font-family: 'Source Code Pro', ui-monospace, monospace;
+  font-weight: 600;
+  font-size: clamp(1.7rem, 1.2rem + 1.8vw, 2.4rem);
+  display: block; margin: .3rem 0 .5rem;
+  font-variant-numeric: tabular-nums;
+}
+.figure-from { font-size: .8rem; color: var(--quiet); line-height: 1.5; }
+
+.actions { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 2.4rem; }
+
+.button {
+  font: 600 .95rem/1 Raleway, sans-serif;
+  padding: .95rem 1.5rem;
+  border: 1px solid var(--blade);
+  background: var(--blade);
+  color: var(--arctic);
+  text-decoration: none;
+  display: inline-block;
+  transition: background .15s ease, color .15s ease;
+}
+.button:hover { background: #8d52f5; }
+.button-quiet { background: transparent; border-color: var(--hairline); color: var(--ink); }
+.button-quiet:hover { background: var(--raised); border-color: var(--steel); }
+
+.under-button { font-size: .82rem; color: var(--quiet); margin-top: 1rem; }
+
+/* ── the clash ──────────────────────────────────────────────────────────── */
+
+.clash { display: grid; gap: 1px; background: var(--hairline); border: 1px solid var(--hairline); max-width: 38rem; margin: 2rem 0 0; }
+.clash div { background: var(--ground); padding: 1rem 1.2rem; display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; }
+.clash span:first-child { font-size: .85rem; color: var(--quiet); }
+.clash span:last-child {
+  font-family: 'Source Code Pro', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.05rem;
+}
+.clash div:nth-child(2) span:last-child,
+.clash div:nth-child(3) span:last-child { color: var(--blade); }
+
+/* ── lists that are not cards ───────────────────────────────────────────── */
+
+.rows { margin: 2rem 0 0; max-width: 42rem; }
+.rows > div { padding: 1.4rem 0; border-top: 1px solid var(--hairline); }
+.rows > div:last-child { border-bottom: 1px solid var(--hairline); }
+.rows h3 { margin-bottom: .45rem; }
+.rows p { margin: 0; color: var(--quiet); max-width: 38rem; }
+
+.numbered { counter-reset: n; }
+.numbered > div { display: grid; grid-template-columns: 2.5rem 1fr; gap: 0 1rem; }
+.numbered > div::before {
+  counter-increment: n; content: counter(n, decimal-leading-zero);
+  font-family: 'Source Code Pro', ui-monospace, monospace;
+  font-size: .78rem; color: var(--blade); padding-top: .3rem;
+}
+
+/* ── plans ──────────────────────────────────────────────────────────────── */
+
+.plans { display: grid; gap: 1px; background: var(--hairline); border: 1px solid var(--hairline); margin-top: 2.4rem; }
+@media (min-width: 52rem) { .plans { grid-template-columns: repeat(3, 1fr); } }
+.plan { background: var(--ground); padding: 1.8rem 1.6rem; }
+.plan.is-main { background: var(--raised); }
+.plan h3 { font-family: Cinzel, Georgia, serif; font-size: 1.05rem; letter-spacing: .06em; }
+.plan .for { color: var(--quiet); font-size: .88rem; margin: .5rem 0 1.2rem; min-height: 2.6em; }
+.plan .amount {
+  font-family: 'Source Code Pro', ui-monospace, monospace;
+  font-size: 1.9rem; font-weight: 600; font-variant-numeric: tabular-nums;
+}
+.plan .amount small { font-size: .85rem; font-weight: 400; color: var(--quiet); }
+.plan .alt { font-size: .8rem; color: var(--quiet); margin: .35rem 0 1.4rem; }
+.plan ul { list-style: none; padding: 0; margin: 0 0 1.6rem; font-size: .9rem; }
+.plan li { padding: .4rem 0 .4rem 1.1rem; position: relative; color: var(--quiet); }
+.plan li::before { content: ''; position: absolute; left: 0; top: .95em; width: .4rem; height: 1px; background: var(--blade); }
+.plan .button { width: 100%; text-align: center; }
+
+/* ── the honesty block ──────────────────────────────────────────────────── */
+
+.not { max-width: 42rem; margin-top: 2rem; }
+.not > div { padding: 1.2rem 0; border-top: 1px solid var(--hairline); }
+.not strong { display: block; font-family: Lora, Georgia, serif; margin-bottom: .35rem; }
+.not p { margin: 0; color: var(--quiet); font-size: .95rem; }
+
+/* ── faq ────────────────────────────────────────────────────────────────── */
+
+details { border-top: 1px solid var(--hairline); max-width: 42rem; }
+details:last-of-type { border-bottom: 1px solid var(--hairline); }
+summary {
+  cursor: pointer; padding: 1.2rem 0; font-family: Lora, Georgia, serif;
+  font-weight: 700; font-size: 1rem; list-style: none;
+  display: flex; justify-content: space-between; gap: 1rem; align-items: baseline;
+}
+summary::-webkit-details-marker { display: none; }
+summary::after { content: '+'; color: var(--blade); font-family: 'Source Code Pro', monospace; font-weight: 400; }
+details[open] summary::after { content: '–'; }
+details p { color: var(--quiet); font-size: .95rem; padding-bottom: .6rem; max-width: 40rem; }
+
+/* ── footer ─────────────────────────────────────────────────────────────── */
+
+footer { padding-block: 3.5rem 4.5rem; border-top: 1px solid var(--hairline); font-size: .85rem; color: var(--quiet); }
+footer a { color: var(--quiet); }
+footer nav { display: flex; flex-wrap: wrap; gap: 1.4rem; margin-bottom: 2rem; }
+.disclosure { max-width: 40rem; border-left: 2px solid var(--hairline); padding-left: 1rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<main id="main">
+
+<!-- ── hero ────────────────────────────────────────────────────────────── -->
+<section class="hero wrap">
+  <span class="wordmark">RAISEROOM</span>
+
+  <h1>Everything an investor will ask for — ready before they ask.</h1>
+
+  <p class="lede">See how investor-ready you are, build your data room, and keep every number
+  with proof of where it came from — so your pitch deck, your figures and your data room all
+  tell the same story.</p>
+
+  <div class="figure">
+    <span class="figure-label">REVENUE · FY2025</span>
+    <span class="figure-value">$2,104,880</span>
+    <span class="figure-from">From your statutory accounts, page 14. Read 12 March, confirmed
+    by you on 14 March.</span>
+  </div>
+
+  <p class="src">This is how every number looks inside RaiseRoom. <b>Nothing is printed without
+  its source.</b></p>
+
+  <div class="actions">
+    <a class="button" href="#plans">Start free</a>
+    <a class="button button-quiet" href="#how">See how it works</a>
+  </div>
+  <p class="under-button">No card for the free plan. For founders raising $1m–$25m, or selling.</p>
+</section>
+
+<!-- ── the problem ─────────────────────────────────────────────────────── -->
+<section class="wrap">
+  <h2>Fundraising is rarely lost on the headline number.<br>It is lost on the second one.</h2>
+
+  <p style="margin-top:1.6rem">Your pitch deck says revenue was 2.1 million. Your spreadsheet
+  says 2.08. The data room has management accounts saying something different again, because
+  they were exported three weeks earlier and nobody went back to update the deck.</p>
+
+  <div class="clash">
+    <div><span>Pitch deck, page 6</span><span>$2,100,000</span></div>
+    <div><span>Financial model, tab “Summary”</span><span>$2,080,000</span></div>
+    <div><span>Management accounts, Q4</span><span>$2,064,300</span></div>
+  </div>
+
+  <p style="margin-top:1.8rem">None of those is a lie. Each was right the day it was written.</p>
+
+  <p>But an investor who spots two of them stops reading for the number and starts reading for
+  the pattern. The question changes from <em>how is this business doing</em> to <em>do these
+  people know what is true about their own company</em> — and that question is very expensive
+  to answer once it has been asked.</p>
+
+  <p class="src">Why it happens: numbers get <b>copied</b>. Worked out once, then typed into the
+  deck, pasted into a spreadsheet, quoted in an email. Every copy ages on its own, and there is
+  no single place to fix it.</p>
+</section>
+
+<!-- ── how it works ────────────────────────────────────────────────────── -->
+<section class="wrap" id="how">
+  <h2>How it works</h2>
+  <p class="lede" style="margin-top:1rem">Three things, in the order you do them.</p>
+
+  <div class="rows numbered">
+    <div>
+      <div>
+        <h3>See where you stand</h3>
+        <p>Eight areas, thirty-two questions, and you can see exactly how the score was worked
+        out. One weak area caps the result, because no company is “nearly ready” with a hole in
+        it. You get back a list of what is missing, in the order that unblocks the most work
+        soonest — with an owner and a date against each.</p>
+      </div>
+    </div>
+    <div>
+      <div>
+        <h3>Put your numbers in once</h3>
+        <p>Upload your accounts, contracts and cap table, and figures are read out of them and
+        offered to you. Nothing becomes usable until you confirm it. Each number is then kept
+        with where it came from, when, and who checked it — and if two numbers that should match
+        do not, you are shown both, side by side, with neither one picked for you.</p>
+      </div>
+    </div>
+    <div>
+      <div>
+        <h3>Build documents from them</h3>
+        <p>Pitch decks, investor updates, one-pagers, your data room index. Each one points at
+        your saved numbers rather than containing its own copy — so fix a figure once and
+        everything using it is flagged to rebuild. Two documents built from the same record
+        cannot disagree.</p>
+      </div>
+    </div>
+  </div>
+
+  <p class="src">If a document needs a figure you have not recorded, it <b>stops and tells you
+  which one</b> rather than filling the gap with something plausible.</p>
+</section>
+
+<!-- ── what makes it different ─────────────────────────────────────────── -->
+<section class="wrap">
+  <h2>What makes it different</h2>
+
+  <div class="rows">
+    <div>
+      <h3>Proof behind every number</h3>
+      <p>Typed in, read from a document, confirmed by you, or calculated with its sum attached.
+      Four ways in, and no fifth. There is deliberately no “the AI worked it out”.</p>
+    </div>
+    <div>
+      <h3>An adviser that cites its sources</h3>
+      <p>It answers from your records and a dated reference library, with every claim pointing
+      at where it came from. It says so when it does not know, and it cannot write a number at
+      all.</p>
+    </div>
+    <div>
+      <h3>Share links that stay yours</h3>
+      <p>One link for one named person, showing only what their stage allows, switched off for
+      them alone whenever you want. You see when they opened it and for how long. IP addresses
+      are deliberately not recorded.</p>
+    </div>
+    <div>
+      <h3>Your data never meets another customer's</h3>
+      <p>No benchmarks, no averages, no “companies like yours”, no market reports. Not a policy
+      somebody enforces — the software has no way to read across companies.</p>
+    </div>
+    <div>
+      <h3>It keeps working after the money lands</h3>
+      <p>Lock a forecast, close a month, explain the differences in writing at the time. Two
+      years later you can still show the number you reported and the document it came from —
+      which is the one thing nobody can rebuild afterwards.</p>
+    </div>
+  </div>
+
+  <p class="src">On cross-company data: <b>automated tests fail if anybody adds a path that
+  reads across organisations.</b> It is a property of the build, not a review step somebody
+  performs.</p>
+</section>
+
+<!-- ── plans ───────────────────────────────────────────────────────────── -->
+<section class="wrap" id="plans">
+  <h2>Plans</h2>
+  <p class="lede" style="margin-top:1rem">Free is a plan, not a timer. Paid plans start with
+  seven days and no payment taken.</p>
+
+  <div class="plans">
+    <div class="plan">
+      <h3>FREE</h3>
+      <p class="for">Find out where you stand before you spend anything.</p>
+      <span class="amount">$0</span>
+      <p class="alt">No card</p>
+      <ul>
+        <li>Investor-readiness score, with its working</li>
+        <li>What is missing, in fix order</li>
+        <li>Your data room checklist</li>
+        <li>Record figures with their sources</li>
+        <li>Valuation-readiness pack</li>
+        <li>Full export, always</li>
+        <li>2 seats</li>
+      </ul>
+      <a class="button button-quiet" href="/sign-up">Start free</a>
+    </div>
+
+    <div class="plan is-main">
+      <h3>RAISEROOM</h3>
+      <p class="for">One company, raising or selling, and the record that outlives it.</p>
+      <span class="amount">$129<small> /month</small></span>
+      <p class="alt">or $1,290 a year · $147 workbook credit applies</p>
+      <ul>
+        <li>Everything in Free</li>
+        <li>Build documents from your numbers</li>
+        <li>Share links and a question log</li>
+        <li>The adviser</li>
+        <li>Forecasts, month-end, variances</li>
+        <li>Your branding, and translation</li>
+        <li>10 seats</li>
+      </ul>
+      <a class="button" href="/sign-up">Start 7-day trial</a>
+    </div>
+
+    <div class="plan">
+      <h3>FIRM</h3>
+      <p class="for">Accelerators, funds and banks preparing several companies.</p>
+      <span class="amount">$399<small> /month</small></span>
+      <p class="alt">or $3,990 a year</p>
+      <ul>
+        <li>Everything in RaiseRoom</li>
+        <li>Readiness across every company that invites you</li>
+        <li>No benchmark, no ranking, ever</li>
+        <li>10 seats</li>
+      </ul>
+      <a class="button button-quiet" href="/sign-up">Start 7-day trial</a>
+    </div>
+  </div>
+
+  <p class="src"><b>If you stop paying, nothing is deleted.</b> Your account becomes read-only.
+  You keep reading everything and you keep exporting everything, in full. We do not hold a
+  company's own records to collect an invoice.</p>
+</section>
+
+<!-- ── what it is not ──────────────────────────────────────────────────── -->
+<section class="wrap">
+  <h2>What RaiseRoom is not</h2>
+  <p class="lede" style="margin-top:1rem">Said here rather than discovered later.</p>
+
+  <div class="not">
+    <div>
+      <strong>It does not value your company.</strong>
+      <p>It prepares you for a valuation and tells you what a valuer will ask you to evidence.
+      It does not produce a valuation, an estimate, a range or an opinion of worth.</p>
+    </div>
+    <div>
+      <strong>It does not raise money or introduce you to investors.</strong>
+      <p>It is a tool for organising and evidencing what you already have.</p>
+    </div>
+    <div>
+      <strong>It will not write your numbers.</strong>
+      <p>Every figure in every document comes from one you recorded or confirmed. That is the
+      product, not a limitation of it.</p>
+    </div>
+    <div>
+      <strong>It is not legal, financial, tax or investment advice.</strong>
+      <p>We are not your lawyer, accountant, broker or adviser.</p>
+    </div>
+    <div>
+      <strong>It is not a replacement for your data room.</strong>
+      <p>It is the layer that knows whether what is in one is consistent, current and enough.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── faq ─────────────────────────────────────────────────────────────── -->
+<section class="wrap">
+  <h2>Questions</h2>
+  <div style="margin-top:2rem">
+    <details>
+      <summary>Does the AI see my accounts?</summary>
+      <p>No. The adviser is sent the question you typed and the relevant passages from a
+      reference library held in version control. It is not sent your figures, your documents or
+      your data room. Translation sends the passage with every number removed first, and a
+      translation that comes back with a number in it is rejected.</p>
+    </details>
+    <details>
+      <summary>Is my data used to train anything?</summary>
+      <p>No. Your figures and documents are not used to train, fine-tune or evaluate any model,
+      ours or anybody else's.</p>
+    </details>
+    <details>
+      <summary>Can other companies see my data, even anonymised?</summary>
+      <p>No. No figure, document, forecast, question or answer from your organisation is ever
+      visible to another customer, and no benchmark, average or market report is ever computed
+      across customers. The software has no code path that reads across companies.</p>
+    </details>
+    <details>
+      <summary>What happens if I cancel?</summary>
+      <p>Nothing is deleted. Your organisation becomes read-only, you keep reading everything,
+      and you keep exporting everything in full.</p>
+    </details>
+    <details>
+      <summary>Can I get my data out?</summary>
+      <p>At any time, in one click, on every plan including Free, in open formats, including
+      after a subscription has ended. Every number with its source, every document, every
+      version, the whole history.</p>
+    </details>
+    <details>
+      <summary>I bought the workbook. Does that count for anything?</summary>
+      <p>Yes. <em>Before They Ask</em> carries a $147 credit, redeemable once against one annual
+      subscription. It does not expire, and redeeming it carries your workbook answers into the
+      product.</p>
+    </details>
+  </div>
+</section>
+
+<!-- ── close ───────────────────────────────────────────────────────────── -->
+<section class="wrap">
+  <h2>You will be asked for all of it eventually.</h2>
+  <p class="lede" style="margin-top:1.2rem">The only question is whether you assemble it now, or
+  in the three weeks somebody gives you to produce it.</p>
+  <div class="actions">
+    <a class="button" href="#plans">Start free</a>
+  </div>
+  <p class="under-button">The investor-readiness score, what is missing, and your data room
+  checklist — no card.</p>
+</section>
+
+</main>
+
+<footer class="wrap">
+  <nav>
+    <a href="/terms">Terms</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/dpa">Data processing</a>
+    <a href="/subprocessors">Sub-processors</a>
+  </nav>
+  <p class="disclosure">RaiseRoom is published by TekAIDA Consulting LLC. Our founder is also an
+  Executive Director at The Post Oak Group, an investment bank we may introduce you to; we take
+  no fee for any introduction, and you are under no obligation to use them.</p>
+  <p style="margin-top:1.6rem">© 2026 TekAIDA Consulting LLC</p>
+</footer>
+
+</body>
+</html>

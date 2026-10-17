@@ -1,0 +1,37 @@
+# The same two jobs as the systemd timers, for a host without systemd.
+#
+#   sudo crontab -u root deploy/crontab.example
+#
+# Use one or the other, never both: two backups at 02:00 writing to the same
+# directory is twice the disk and one of them pruning sets the other just made.
+#
+# WHAT CRON DOES WORSE THAN THE TIMERS, SO YOU KNOW WHAT YOU ARE CHOOSING
+#
+#   · A missed run is simply missed. The systemd timer has Persistent=true and
+#     runs a backup the host was switched off for; cron does not.
+#   · Failure handling is MAILTO, which needs a working MTA on the box. The
+#     timers call deploy/alert.sh on failure, which needs one URL.
+#   · Nothing stops two runs overlapping if one is slow. `flock` below does.
+#
+# Set MAILTO to somebody who reads it, or the exit codes go nowhere — which is
+# the normal way a backup is discovered to have been failing for three weeks.
+
+SHELL=/bin/sh
+PATH=/usr/local/bin:/usr/bin:/bin
+MAILTO=CHANGE-ME@example.com
+
+# ── nightly backup, 02:00, database and objects together ───────────────────
+# flock so a slow night cannot overlap the next one. The exit code reaches cron,
+# which mails MAILTO; the JSON line goes to the journal via logger so a shipper
+# can pick it up.
+0 2 * * * cd /srv/raiseroom/app && flock -n /var/lock/raiseroom-backup.lock docker compose exec -T app node tools/backup.mjs --data-dir /data --dest /backups --retain-days 35 2>&1 | logger -t raiseroom-backup
+
+# ── health, degraded storage and disk, every minute ────────────────────────
+# Against the PUBLIC url, deliberately: a check against loopback passes while
+# TLS is expired and while DNS points at somebody else.
+* * * * * cd /srv/raiseroom/app && flock -n /var/lock/raiseroom-watch.lock node --experimental-sqlite tools/watch.mjs --url https://raiseroom.app --data-dir /srv/raiseroom/data --state /var/lib/raiseroom/watch-state.json 2>&1 | logger -t raiseroom-watch
+
+# ── optional: prune usage counters over 24 months old ──────────────────────
+# The application does this once per process as a safety net, so a host that
+# restarts occasionally does not need this line at all. See docs/DEPLOY.md.
+# 30 3 * * 0 cd /srv/raiseroom/app && docker compose exec -T app node tools/usage.mjs --prune 2>&1 | logger -t raiseroom-usage

@@ -1,0 +1,20 @@
+# Nightly, at a quiet hour, with a jitter.
+#
+# RandomizedDelaySec exists because 02:00 exactly is when every cron job on
+# every host runs. Spreading it stops the backup competing with whatever else
+# the machine does at the top of the hour.
+#
+# Persistent=true runs a missed backup after a reboot rather than skipping to
+# tomorrow, which matters on a host that is occasionally down at 02:00.
+
+[Unit]
+Description=Run the RaiseRoom backup nightly
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+RandomizedDelaySec=900
+Persistent=true
+Unit=raiseroom-backup.service
+
+[Install]
+WantedBy=timers.target

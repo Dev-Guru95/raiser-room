@@ -1,0 +1,61 @@
+# Litestream — continuous replication of the SQLite write-ahead log.
+#
+#   sudo cp deploy/litestream.yml /etc/litestream.yml
+#   sudo systemctl enable --now litestream
+#
+# WHAT THIS BUYS, IN ONE SENTENCE
+#
+# The nightly backup restores to last night. This restores to any minute, which
+# is the difference between losing a day of a customer's work and losing a
+# minute of it.
+#
+# WHY IT MATTERS MORE THAN IT LOOKS
+#
+# `docs/DEPLOY.md` sets out the two things that force a move to Postgres, and
+# point-in-time restore is the commoner of the two. This removes it for the cost
+# of one config file, which is why that document says to run this before anyone
+# plans a week of converting 443 call sites to promises.
+#
+# IT IS NOT A SUBSTITUTE FOR THE NIGHTLY BACKUP, FOR ONE REASON
+#
+# Litestream replicates the DATABASE. The uploaded files in /data/objects are
+# not a database and are not replicated here. A restore from Litestream alone
+# gives a database listing documents whose bytes are in last night's backup —
+# so the two together are the recovery story, and neither is it alone.
+#
+# BEFORE THIS WORKS, FILL IN FOUR VALUES
+#
+# The bucket, the region, and the two credentials. Put the credentials in
+# /etc/default/litestream rather than here if your packaging reads it:
+#
+#   LITESTREAM_ACCESS_KEY_ID=…
+#   LITESTREAM_SECRET_ACCESS_KEY=…
+#
+# A file at /etc/litestream.yml holding long-lived storage credentials should be
+# 0600 and owned by root either way.
+
+dbs:
+  # The path as the HOST sees it — Litestream runs on the host, not in the
+  # container, so this is the bind mount from compose.override.yaml and not
+  # /data.
+  - path: /srv/raiseroom/data/raiseroom.db
+    replicas:
+      - type: s3
+        bucket: CHANGE-ME-raiseroom-litestream
+        path: raiseroom.db
+        region: CHANGE-ME
+        # Point this at your provider for anything S3-compatible — Backblaze B2,
+        # Cloudflare R2, Hetzner — and leave it out for AWS itself.
+        # endpoint: https://CHANGE-ME.r2.cloudflarestorage.com
+
+        # How long a write can be unreplicated. One second is the window of
+        # work a sudden host failure can lose, and the bandwidth cost of a
+        # product with this write volume is negligible.
+        sync-interval: 1s
+
+        # The restore window, matched to the 35 days the data processing
+        # addendum promises for backups. Litestream snapshots are backups and
+        # the same commitment applies to them: setting this longer makes the
+        # addendum untrue.
+        retention: 840h
+        snapshot-interval: 24h

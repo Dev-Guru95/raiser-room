@@ -1,0 +1,35 @@
+# The nightly backup.
+#
+# Type=oneshot, driven by raiseroom-backup.timer. It runs inside the container
+# because that is where /data is a path rather than a Docker implementation
+# detail, and it writes to /backups, which is a bind mount to the host.
+#
+# The command exits 1 when there is no verified backup on disk, which systemd
+# records as a failed unit and reports to OnFailure below. A backup job that
+# fails silently for three weeks is the normal way this goes wrong.
+
+[Unit]
+Description=RaiseRoom nightly backup (database and objects, together)
+Documentation=file:///srv/raiseroom/app/deploy/README.md
+After=docker.service
+Requires=docker.service
+OnFailure=raiseroom-alert@%n.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/srv/raiseroom/app
+ExecStart=/usr/bin/docker compose exec -T app node tools/backup.mjs \
+  --data-dir /data --dest /backups --retain-days 35
+
+# The JSON line on stdout is for a log shipper; the human summary on stderr is
+# for whoever reads `journalctl -u raiseroom-backup`. Both end up in the journal,
+# which is the searchable place the handover asks for until you have another.
+StandardOutput=journal
+StandardError=journal
+
+# Long enough for a large objects directory on a slow disk, short enough that a
+# wedged run does not overlap tomorrow's.
+TimeoutStartSec=3600
+
+[Install]
+WantedBy=multi-user.target

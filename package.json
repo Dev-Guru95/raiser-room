@@ -1,0 +1,14 @@
+{
+  "name": "raiseroom",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "RaiseRoom \u2014 a canonical fact store with provenance, for companies preparing to raise or sell.",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "test": "node --test --experimental-sqlite \"test/*.test.js\"",
+    "test:watch": "node --test --watch --experimental-sqlite \"test/*.test.js\""
+  }
+}
