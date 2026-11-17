@@ -109,10 +109,16 @@ export function layout({
 <title>${h(title)} — RaiseRoom</title>
 <link rel="stylesheet" href="/assets/app.css">
 <link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#101F3F">
 </head><body class="${cls(org && 'has-rail')}">
 <a class="skip" href="#main">Skip to content</a>
 <header class="top">
-  <a class="wordmark" href="/">RaiseRoom</a>
+  <a class="wordmark" href="/">
+    <img class="wordmark-mark" src="/assets/brand/mark-gold-on-navy.svg" alt="" width="26" height="26">
+    <span class="wordmark-text">RaiseRoom</span>
+  </a>
   ${org ? `<span class="top-org">${h(org.name)}</span>` : ''}
   <div class="top-end">
     ${user
@@ -159,6 +165,9 @@ export function sharedLayout({
 <title>${h(title)}${company ? ` — ${h(company)}` : ''}</title>
 <link rel="stylesheet" href="/assets/app.css">
 <link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#101F3F">
 </head><body class="is-shared">
 <a class="skip" href="#main">Skip to content</a>
 <header class="top top-shared">
@@ -406,26 +415,6 @@ export function action({ href = null, label, csrf = null, confirm = null, tone =
     <button class="button button-${h(tone)}" type="submit">${h(label)}</button></form>`;
 }
 
-// ──────────────────────────────────────────────────────────────────── icon ──
-
-/**
- * The tab icon.
- *
- * Deliberately not the logo. The logo artwork is locked — it is not to be
- * redrawn, re-set or cropped — and a 16-pixel reproduction of a wordmark is all
- * three. So the icon is drawn in the app's own language instead: a figure with
- * the provenance hairline under it, which is the one component this whole
- * interface is built around and reads at 16 pixels because it is two strokes.
- *
- * Declared in the page head, which is also what stops a browser asking for
- * `/favicon.ico` and getting a 404 on every page load.
- */
-export const icon = () => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" fill="#000000"/>
-  <rect x="7" y="8" width="13" height="3.2" fill="#FFFFFF"/>
-  <rect x="7" y="14" width="18" height="3.2" fill="#FFFFFF"/>
-  <path d="M7 23.5 h3 M11.5 23.5 H25" stroke="#7E3FF2" stroke-width="1.6" fill="none"/>
-</svg>`;
 
 // ───────────────────────────────────────────────────────────── stylesheet ──
 
@@ -445,15 +434,31 @@ export function stylesheet() {
 @font-face{font-family:'Source Code Pro';src:url('/assets/fonts/SourceCodePro-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
 
 :root{
-  --paper:#FFFFFF; --ink:#111111; --ink-muted:#5C5C5C; --ink-faint:#8A8A8A;
-  --rule:#E3E3E3; --rule-firm:#C9C9C9; --accent:#7E3FF2; --wash:#F7F5FF;
-  --onyx:#000000; --positive:#1F7A4D; --negative:#A3243B; --caution:#8A6A00;
+  /* THE IDENTITY, as delivered in assets/brand/PALETTE.txt. The four brand
+     values are named once here and everything below is expressed in terms of
+     them, so a recolour is this block and a colour literal further down the
+     file is a bug.
+
+     The one rule that shapes the rest: gold is an accent and never type. It
+     reaches 2.1:1 against the cream ground, which is a soft rule and an
+     unreadable word, so gold draws marks, rules and fills, and burgundy
+     carries the interactive text instead. */
+  --navy:#101F3F; --gold:#C9A227; --cream:#F4EFE4; --burgundy:#6E1F33;
+
+  --paper:var(--cream); --ink:var(--navy); --ink-muted:#44506E; --ink-faint:#5F6A86;
+  --rule:#DDD4C2; --rule-firm:#B5A88C; --accent:var(--gold); --wash:#EBE3D3;
+  --link:var(--burgundy);
+  /* Type on a navy ground: the top bar, and nothing else so far. */
+  --on-navy:var(--cream); --on-navy-muted:#B9C0D1;
+  --positive:#1C6E45; --negative:var(--burgundy); --caution:#7A5E00;
   --ui:'Raleway',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   --mono:'Source Code Pro',ui-monospace,SFMono-Regular,Menlo,monospace;
   --display:'Cinzel',Georgia,serif;
   --rail-w:13.5rem;
-  /* The page is paper, deliberately: this is a tool for preparing documents, and
-     documents are white. Declaring the scheme stops a browser in dark mode from
+  /* The ground is the brand's cream rather than white. The documents this tool
+     produces are still white — a deck is printed on paper — and that difference
+     is deliberate: the tool and the artefact it makes should not look like the
+     same object. Declaring the scheme stops a browser in dark mode from
      rendering form controls dark against it, which is the one place the choice
      would have leaked out as a bug. */
   color-scheme:light;
@@ -467,21 +472,36 @@ body{
 }
 .tnum{font-variant-numeric:tabular-nums}
 
-.skip{position:absolute;left:-9999px;top:0;background:var(--ink);color:#fff;padding:.5rem .75rem;z-index:10}
+.skip{position:absolute;left:-9999px;top:0;background:var(--ink);color:var(--on-navy);padding:.5rem .75rem;z-index:10}
 .skip:focus{left:.5rem;top:.5rem}
 
 /* ── top bar ───────────────────────────────────────────────────────────── */
+/* A navy ground under a gold rule — the one place the identity is stated at
+   full strength, and the reason the rest of the page can stay quiet. The rule
+   is 2px because a gold hairline on navy is a suggestion of a rule. */
 .top{
   display:flex; align-items:baseline; gap:1rem; flex-wrap:wrap;
-  padding:1rem 1.5rem; border-bottom:1px solid var(--rule);
+  padding:1rem 1.5rem; background:var(--navy); color:var(--on-navy);
+  border-bottom:2px solid var(--gold);
 }
+/* The mark is the delivered artwork placed beside the name, rather than the
+   lockup file: the wordmark stays live text, so it is selectable, searchable
+   and readable to a screen reader, and the artwork is used as the file it
+   arrived as instead of being re-drawn in path data. The <img> carries no alt
+   because the name is right beside it — announcing it twice is worse than not
+   announcing it at all. */
 .wordmark{
   font-family:var(--display); font-weight:700; font-size:1.25rem;
-  letter-spacing:.02em; color:var(--ink); text-decoration:none;
+  letter-spacing:.02em; color:var(--on-navy); text-decoration:none;
+  display:inline-flex; align-items:center; gap:.5rem;
 }
-.top-org{color:var(--ink-muted); font-size:.875rem}
+.wordmark-mark{display:block; width:1.625rem; height:1.625rem}
+.top-org{color:var(--on-navy-muted); font-size:.875rem}
 .top-end{margin-left:auto; display:flex; align-items:baseline; gap:1rem}
-.top-user{color:var(--ink-faint); font-size:.8125rem}
+.top-user{color:var(--on-navy-muted); font-size:.8125rem}
+/* Sign in and sign out sit in the navy bar, where the burgundy they are given
+   below is barely a colour at all. */
+.top .link-button{color:var(--on-navy)}
 
 /* ── the site footer ──────────────────────────────────────────────────────
    On every page. Quiet enough to ignore while reading and findable when
@@ -497,8 +517,14 @@ body{
 .site-foot a{color:var(--ink-muted)}
 .site-foot p{margin:0}
 /* The rail is a grid column, so the footer has to be told to span both or it
-   sits under the navigation and beside nothing. */
-@media (min-width:60rem){
+   sits under the navigation and beside nothing.
+
+   48rem is THE breakpoint in this file: below it the rail is a scrolling strip
+   of tabs and the page is one column, at or above it the rail is a sidebar and
+   the page is a grid. 768px is an iPad held upright, which is the narrowest
+   screen with room for a 13.5rem sidebar and a readable measure beside it.
+   Three rules depend on it and they have to move together. */
+@media (min-width:48rem){
   body.has-rail > .site-foot{grid-column:1/-1}
 }
 
@@ -538,15 +564,48 @@ body{
 .rail-link:hover{color:var(--ink); background:var(--wash)}
 .rail-link.is-here{color:var(--ink); border-left-color:var(--accent); font-weight:700}
 .rail-n{font-family:var(--mono); font-size:.75rem; color:var(--ink-faint)}
+/* ── the rail on a phone ──────────────────────────────────────────────────
+   Below the breakpoint the rail is not a sidebar, because there is no side.
+   Stacked, it is thirteen rows of navigation above the content on every single
+   page — the reader scrolls past the index to reach the thing they opened.
+
+   So it turns on its side and becomes a strip of tabs that scrolls on its own,
+   which is the one place in this interface where horizontal scrolling is right:
+   it is an index, an index is read along, and the alternative is pushing the
+   page itself sideways. The marker moves from the left edge to the underside
+   for the same reason — a left border on a horizontal tab marks nothing.
+
+   'overscroll-behavior-x:contain' stops a swipe that runs off the end of the
+   strip from being taken as a back gesture by the browser. */
+@media (max-width:47.99rem){
+  .rail{
+    border-right:0; border-bottom:1px solid var(--rule);
+    overflow-x:auto; overscroll-behavior-x:contain;
+  }
+  .rail-list{display:flex; padding:0}
+  .rail-link{
+    border-left:0; border-bottom:2px solid transparent;
+    padding:.65rem .85rem; white-space:nowrap;
+  }
+  .rail-link.is-here{border-left-color:transparent; border-bottom-color:var(--accent)}
+}
 
 /* ── layout ────────────────────────────────────────────────────────────── */
 .main{padding:2rem 1.5rem 5rem; max-width:62rem}
 .main.is-wide{max-width:none}
-@media (min-width:60rem){
+@media (min-width:48rem){
   body.has-rail{display:grid; grid-template-columns:var(--rail-w) 1fr; grid-template-rows:auto 1fr}
   body.has-rail > .top{grid-column:1/-1}
   body.has-rail > .rail{grid-row:2; min-height:100%}
   body.has-rail > .main{grid-row:2}
+}
+/* 1.5rem of gutter on each side is right on a laptop and is a seventh of a
+   phone screen spent on nothing. The footer's side padding is deliberately the
+   same number as the main column's, so that the footer's first link sits under
+   the page's first word — the two move together or that stops being true. */
+@media (max-width:47.99rem){
+  .main{padding:1.5rem 1rem 3.5rem}
+  .site-foot{padding:1.25rem 1rem 2rem}
 }
 
 /* ── type ──────────────────────────────────────────────────────────────── */
@@ -557,7 +616,9 @@ p{margin:0 0 .75rem; max-width:66ch}
 .lede{color:var(--ink-muted); max-width:62ch; margin-bottom:1rem}
 .note{color:var(--ink-muted); font-size:.875rem; max-width:62ch}
 .hint{color:var(--ink-muted); font-size:.8125rem; margin:.1rem 0 .35rem; max-width:62ch}
-a{color:var(--accent)}
+/* Burgundy, not gold. Gold is the accent the brand sheet gives for marks and
+   rules, and a gold link on cream is a word the reader cannot make out. */
+a{color:var(--link)}
 a:hover{color:var(--ink)}
 
 .page-head{margin-bottom:1.75rem; padding-bottom:1rem; border-bottom:1px solid var(--rule)}
@@ -579,14 +640,20 @@ a:hover{color:var(--ink)}
 .figure-label{display:block; font-size:.75rem; color:var(--ink-muted)}
 .figure-value{display:block; font-size:1.5rem; font-weight:700; line-height:1.15; letter-spacing:-.01em}
 .figure-unit{font-size:.75em; color:var(--ink-muted); margin-left:.15em}
+/* 2px, not the hairline this was when the accent was a purple at 5.5:1 against
+   a white page. The accent is now gold on cream, which is 2.1:1 — a 1px gold
+   line on this ground is nearly not there, and this line is the one component
+   the whole interface is built around. Widened for every state rather than for
+   the traced one alone, so that width stays free of meaning: what distinguishes
+   the three is still colour and dash pattern. */
 .figure-source{
   display:block; position:relative; margin-top:.3rem; padding-left:.7rem;
   font-size:.75rem; color:var(--ink-muted);
-  border-left:1px solid var(--rule-firm);
+  border-left:2px solid var(--rule-firm);
 }
 .figure-source::before{
   content:''; position:absolute; left:0; top:.6em; width:.45rem;
-  border-top:1px solid var(--rule-firm);
+  border-top:2px solid var(--rule-firm);
 }
 .figure.is-traced .figure-source{border-left-color:var(--accent); color:var(--ink-muted)}
 .figure.is-traced .figure-source::before{border-top-color:var(--accent)}
@@ -612,10 +679,25 @@ a:hover{color:var(--ink)}
 .record-main{min-width:0}
 .record-title{font-weight:700; display:block}
 a.record-title{text-decoration:none; color:var(--ink)}
-a.record-title:hover{color:var(--accent)}
+a.record-title:hover{color:var(--link)}
 .record-meta{display:block; font-size:.8125rem; color:var(--ink-muted)}
 .record-body{margin-top:.35rem; font-size:.875rem}
 .record-actions{display:flex; gap:.4rem; flex:0 0 auto; flex-wrap:wrap}
+/* A record puts its controls beside its title, which stops being possible on a
+   phone: the data room's "not applicable" row carries a reason field as well as
+   a button, and that pair alone is wider than the screen. Because the actions
+   are 'flex:0 0 auto' they refused to shrink and pushed the whole page sideways
+   — 46px of horizontal scroll on /room, the only overflow in the app.
+   Below the breakpoint the record stacks instead, and the field inside it is
+   allowed to shrink. 'min-width:0' is the half of that which is easy to miss:
+   an input carries an intrinsic width from its 'size' attribute and will not go
+   below it otherwise. */
+@media (max-width:47.99rem){
+  .record{flex-direction:column; gap:.5rem}
+  .record-actions{width:100%}
+  .record-actions form.inline{display:flex; gap:.4rem; width:100%}
+  .record-actions input{min-width:0; flex:1 1 auto}
+}
 
 /* ── pills ─────────────────────────────────────────────────────────────── */
 .pill{
@@ -625,7 +707,7 @@ a.record-title:hover{color:var(--accent)}
 .pill-good{border-color:var(--positive); color:var(--positive)}
 .pill-bad{border-color:var(--negative); color:var(--negative)}
 .pill-warn{border-color:var(--caution); color:var(--caution)}
-.pill-active{border-color:var(--accent); color:var(--accent)}
+.pill-active{border-color:var(--accent); color:var(--link)}
 
 /* ── tables ────────────────────────────────────────────────────────────── */
 .table-scroll{overflow-x:auto}
@@ -655,23 +737,27 @@ input,textarea,select{
 }
 textarea{line-height:1.5; resize:vertical}
 input:focus,textarea:focus,select:focus,button:focus,a:focus{
-  outline:2px solid var(--accent); outline-offset:1px;
+  /* Navy rather than the accent, and offset clear of the control: a focus ring
+     has to be seen on both grounds, and gold is 2.1:1 on the cream one. */
+  outline:2px solid var(--ink); outline-offset:2px;
 }
 .form-actions{display:flex; gap:.5rem; align-items:center; margin-top:1rem}
 
 .button{
   display:inline-block; font:inherit; font-size:.875rem; font-weight:700;
-  padding:.4rem .8rem; border:1px solid var(--ink); background:var(--ink); color:#fff;
+  padding:.4rem .8rem; border:1px solid var(--ink); background:var(--ink); color:var(--on-navy);
   cursor:pointer; text-decoration:none; border-radius:0;
 }
-.button:hover{background:var(--accent); border-color:var(--accent); color:#fff}
+/* Gold fill, navy type: 6.7:1, and the one place gold carries a word — a
+   16px label on a fill, which is not body text. */
+.button:hover{background:var(--accent); border-color:var(--accent); color:var(--navy)}
 .button-quiet{background:transparent; color:var(--ink); border-color:var(--rule-firm)}
-.button-quiet:hover{border-color:var(--accent); color:var(--accent); background:transparent}
+.button-quiet:hover{border-color:var(--accent); color:var(--link); background:transparent}
 .button-danger{background:transparent; color:var(--negative); border-color:var(--negative)}
-.button-danger:hover{background:var(--negative); color:#fff}
+.button-danger:hover{background:var(--negative); color:var(--on-navy)}
 .link-button{
   background:none; border:0; padding:0; font:inherit; font-size:.8125rem;
-  color:var(--accent); cursor:pointer; text-decoration:underline;
+  color:var(--link); cursor:pointer; text-decoration:underline;
 }
 .inline{display:inline}
 
@@ -681,16 +767,28 @@ input:focus,textarea:focus,select:focus,button:focus,a:focus{
 .banner-detail{font-size:.875rem; color:var(--ink-muted); margin-top:.3rem !important}
 .banner-code{margin-top:.4rem !important}
 .banner-code code{font-family:var(--mono); font-size:.6875rem; color:var(--ink-faint)}
-.banner-error{border-left-color:var(--negative); background:#FDF4F5}
-.banner-good{border-left-color:var(--positive); background:#F2F9F5}
-.banner-warn{border-left-color:var(--caution); background:#FBF7EC}
+.banner-error{border-left-color:var(--negative); background:#F6EAEC}
+.banner-good{border-left-color:var(--positive); background:#ECF4EE}
+.banner-warn{border-left-color:var(--caution); background:#F7EFD9}
 
 /* ── a generated document, shown as what it is ─────────────────────────── */
 /* The one place in the interface with a shadow. A generated document is a
    different kind of object from the tool that made it — it will be printed,
    attached, and read by somebody who has never seen this app — and lifting it
    off the page is the cheapest way to say so. Everything else here is flat. */
-.paper-frame{background:#F2F2F2; padding:1.5rem; border:1px solid var(--rule)}
+/* The surround behind a preview of a generated page. A shade of the ground
+   rather than the ground itself, because what sits inside it is white paper and
+   the frame exists to show that the paper is white. */
+.paper-frame{background:#E6DECD; padding:1.5rem; border:1px solid var(--rule)}
+/* The grey mount is what says "this is a different kind of object". On a phone
+   it was 48px of a 343px screen spent making that point, around a document that
+   then had 246px to be read in. The point survives at 4px a side; the rest goes
+   to the document. It is still an A4 page in a narrow window — that is the
+   shape of the thing, not a layout fault — and the reader scrolls it inside its
+   own frame rather than dragging the page about underneath it. */
+@media (max-width:47.99rem){
+  .paper-frame{padding:.25rem}
+}
 .paper{
   display:block; width:100%; height:min(80vh,56rem); border:0;
   background:var(--paper); box-shadow:0 1px 3px rgba(0,0,0,.18);
@@ -751,9 +849,9 @@ pre.draft{
 }
 .link-out{word-break:break-all}
 .write-own{margin-top:.5rem}
-.write-own summary{font-size:.8125rem; color:var(--accent); cursor:pointer}
+.write-own summary{font-size:.8125rem; color:var(--link); cursor:pointer}
 .write-own summary:hover{color:var(--ink)}
-.button-solid{background:var(--ink); color:#fff; border-color:var(--ink)}
+.button-solid{background:var(--ink); color:var(--on-navy); border-color:var(--ink)}
 
 /* ── the counterparty's page ───────────────────────────────────────────── */
 /* No rail, so the content is centred and narrower: this is a document being
@@ -761,7 +859,13 @@ pre.draft{
    bottom so that printing or saving the page takes it along — which is the only
    thing a watermark actually achieves, and the product says so in words. */
 body.is-shared .main{margin:0 auto; max-width:54rem}
-.top-shared{border-bottom:1px solid var(--ink)}
+/* The counterparty's page is the company's, not the product's: the navy bar and
+   the mark belong to RaiseRoom, so this header reverts to the light ground with
+   the company's own name in it. */
+.top-shared{
+  background:var(--paper); color:var(--ink); border-bottom:1px solid var(--ink);
+}
+.top-shared .wordmark{color:var(--ink)}
 .mark{text-align:right; font-size:.75rem; line-height:1.3}
 .mark-line{display:block}
 .mark-faint{color:var(--ink-faint)}
@@ -770,6 +874,35 @@ body.is-shared .main{margin:0 auto; max-width:54rem}
   font-size:.75rem; color:var(--ink-muted);
 }
 .mark-footer p{margin:0; max-width:none}
+/* ── touch ────────────────────────────────────────────────────────────────
+   Two triggers, because width alone is the wrong question and pointer alone is
+   not testable. A touchscreen laptop is wide and still being prodded with a
+   finger, which 'pointer:coarse' catches and a width query does not; and a
+   browser being driven by a script reports a fine pointer whatever size it is,
+   which is how a rule like this goes unverified for a year. Below the
+   breakpoint the screen is a phone often enough that the larger controls are
+   right there anyway, so the two conditions sit side by side.
+
+   44px is the figure both platform guidelines land on. It is applied by
+   padding rather than by 'height', so a control that wraps onto two lines still
+   grows instead of clipping what is inside it. A mouse on a desktop-width
+   window matches neither condition and sees none of this. */
+@media (pointer:coarse),(max-width:47.99rem){
+  .button{padding:.65rem .9rem}
+  /* px, not rem, and deliberately: 44 is a measurement of a fingertip, not of
+     this page's type. A select does not take padding the way a text input does
+     — the control is drawn by the platform — so it is given the floor directly
+     rather than being padded towards it and left short. */
+  input,textarea,select,.button,.link-button{min-height:44px}
+  input,textarea,select{padding:.6rem .6rem}
+  /* Buttons that are styled as text — "Sign out", "Remove" — have no padding
+     by design, so they get their hit area vertically and keep their baseline. */
+  .link-button{padding:.75rem 0}
+  .site-foot a{display:inline-block; padding:.75rem 0}
+  .site-foot nav{gap:.25rem 1.25rem}
+  .write-own summary{padding:.6rem 0}
+}
+
 @media print{
   .skip,.rail,.top-end form{display:none}
   .mark-footer{position:fixed; bottom:0; left:0; right:0}

@@ -30,6 +30,15 @@ COPY package.json ./
 
 COPY src ./src
 COPY db ./db
+# The landing page, read from disk per request by src/web/landing.js. Without it
+# `/` falls back to the sign-in page — which is a quiet failure, not a loud one,
+# so it is copied here rather than left to a volume mount somebody forgets.
+COPY docs/landing ./docs/landing
+# The identity artwork: the tab icon, the home-screen icons and the mark in the
+# top bar. Served by the application for the same reason the fonts are — a page
+# that fetches its own logo from somewhere else tells that somewhere else who is
+# reading a diligence file and when.
+COPY assets/brand ./assets/brand
 COPY tools/fonts ./tools/fonts
 COPY tools/usage.mjs ./tools/usage.mjs
 # The operational commands, in the image because that is where /data is mounted.
@@ -46,6 +55,12 @@ COPY server.mjs ./server.mjs
 # who is reading a diligence file and when. An image without them renders in
 # whatever the reader's browser falls back to.
 RUN test -n "$(ls -A tools/fonts)" || (echo 'tools/fonts is empty — the brand faces are missing' && exit 1)
+
+# The same check for the artwork, and for the same reason: a missing favicon is
+# a 404 nobody notices, and a missing mark is a broken image in the top bar of
+# every page in the product.
+RUN test -f assets/brand/favicon.ico && test -f assets/brand/mark-gold-on-navy.svg \
+  || (echo 'assets/brand is incomplete — the identity artwork is missing' && exit 1)
 
 # Writable state. Both are mount points in any real deployment; the directory is
 # created here so a container started with no volume fails on the first write

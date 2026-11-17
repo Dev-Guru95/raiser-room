@@ -35,7 +35,7 @@ import { resolveSession } from './auth.js';
 import {
   SESSION_COOKIE, readCookie, securityHeaders, csrfValid, originAllowed,
 } from './security.js';
-import { layout, stylesheet, banner, icon } from './html.js';
+import { layout, stylesheet, banner } from './html.js';
 import { createThrottle, addressFor } from './throttle.js';
 import { uploadScript } from './upload.js';
 import { healthReport } from './health.js';
@@ -43,6 +43,10 @@ import { ROUTES } from './routes/index.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const FONT_DIR = join(here, '..', '..', 'tools', 'fonts');
+// The identity artwork, as delivered. Served as files rather than redrawn in
+// code: the logo is locked artwork, and a mark re-expressed as hand-written
+// path data is a redrawing of it no matter how close it lands.
+const BRAND_DIR = join(here, '..', '..', 'assets', 'brand');
 
 /** Bodies are small — a form, not a file. Uploads are presigned straight to storage. */
 const MAX_BODY = 512 * 1024;
@@ -101,6 +105,15 @@ export function createApp({
       }
 
       if (url.pathname.startsWith('/assets/')) return serveAsset(url.pathname, res, headers);
+      // Asked for at the root by browsers, mail clients and phone home screens
+      // whatever the page head says, so they are answered at the root too.
+      if (url.pathname === '/favicon.ico') return serveBrandFile('favicon.ico', res, headers);
+      if (url.pathname === '/apple-touch-icon.png') {
+        return serveBrandFile('apple-touch-icon.png', res, headers);
+      }
+      if (url.pathname === '/apple-touch-icon-precomposed.png') {
+        return serveBrandFile('apple-touch-icon.png', res, headers);
+      }
       if (url.pathname.startsWith('/objects/')) {
         return await serveObject({ req, res, url, headers, storage });
       }
@@ -277,9 +290,14 @@ function serveAsset(pathname, res, headers) {
       uploadScript(), 'text/javascript; charset=utf-8');
   }
 
-  if (pathname === '/assets/icon.svg') {
-    return send(res, 200, { ...headers, 'Cache-Control': 'public, max-age=86400' },
-      icon(), 'image/svg+xml');
+  // The tab icon: the navy app tile from the identity set, served as the file
+  // it was delivered as. An SVG icon is used in preference to the .ico because
+  // it is the one that stays sharp on a high-density display; the .ico is still
+  // answered at the root for the browsers that only ask there.
+  if (pathname === '/assets/icon.svg') return serveBrandFile('icon-navy.svg', res, headers);
+
+  if (pathname.startsWith('/assets/brand/')) {
+    return serveBrandFile(pathname.slice('/assets/brand/'.length), res, headers);
   }
 
   if (pathname.startsWith('/assets/fonts/')) {
@@ -297,6 +315,45 @@ function serveAsset(pathname, res, headers) {
   }
 
   return send(res, 404, headers, '');
+}
+
+
+/**
+ * One file from the identity set.
+ *
+ * An allowlist rather than a path check, for two reasons: the set is fixed and
+ * small, so naming its members costs nothing, and it makes the content type a
+ * property of the file rather than a guess from its extension. A request for
+ * anything not on the list is a 404 whatever it looks like, so there is no
+ * traversal to defend against.
+ */
+const BRAND_FILES = Object.freeze({
+  'favicon.ico': 'image/vnd.microsoft.icon',
+  'apple-touch-icon.png': 'image/png',
+  'icon-192.png': 'image/png',
+  'icon-512.png': 'image/png',
+  'icon-navy.svg': 'image/svg+xml',
+  'icon-cream.svg': 'image/svg+xml',
+  'icon-burgundy.svg': 'image/svg+xml',
+  'mark-gold-on-navy.svg': 'image/svg+xml',
+  'mark-navy-on-cream.svg': 'image/svg+xml',
+  'lockup-on-navy.svg': 'image/svg+xml',
+  'lockup-on-light.svg': 'image/svg+xml',
+  'lockup-stacked-on-navy.svg': 'image/svg+xml',
+  'lockup-stacked-on-light.svg': 'image/svg+xml',
+  'wordmark-cream.svg': 'image/svg+xml',
+  'wordmark-navy.svg': 'image/svg+xml',
+});
+
+function serveBrandFile(name, res, headers) {
+  const type = BRAND_FILES[name];
+  if (!type) return send(res, 404, headers, '');
+  const file = join(BRAND_DIR, name);
+  if (!existsSync(file)) return send(res, 404, headers, '');
+  res.writeHead(200, {
+    ...headers, 'Content-Type': type, 'Cache-Control': 'public, max-age=604800',
+  });
+  return res.end(readFileSync(file));
 }
 
 // ──────────────────────────────────────────────────────────────── objects ──

@@ -1,0 +1,11 @@
+RaiseRoom
+
+Navy      #101F3F   primary — grounds, headers, body type
+Gold      #C9A227   accent — the mark, rules, emphasis
+Cream     #F4EFE4   light ground
+Burgundy  #6E1F33   supporting — secondary surfaces, alerts, charts
+
+Display and wordmark: Cinzel Bold.
+
+Gold is an accent and never body text — it fails contrast at small sizes
+on both navy and cream. For body text use cream on navy, or navy on cream.

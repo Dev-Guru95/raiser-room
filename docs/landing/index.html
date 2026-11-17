@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RaiseRoom</title>
 <meta name="description" content="Investor readiness, your data room, and proof behind every number — in one place, before anybody asks.">
+<link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#101F3F">
 <style>
 /* ──────────────────────────────────────────────────────────────────────────
    THE FONTS ARE SERVED FROM HERE, NOT FROM GOOGLE
@@ -46,7 +50,7 @@
    THE ONE DEVICE THIS PAGE IS BUILT ON
 
    Every claim carries a source line underneath it, set small, in Source Code
-   Pro, behind a purple rule — exactly the way a figure is shown inside the
+   Pro, behind a gold rule — exactly the way a figure is shown inside the
    product itself.
 
    It is not decoration. The product's whole argument is that a number without
@@ -61,18 +65,29 @@
    ────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  --onyx: #000000;
-  --arctic: #FFFFFF;
-  --blade: #7E3FF2;
-  --steel: #B0B0B0;
+  /* THE IDENTITY, as delivered in assets/brand/PALETTE.txt. The page was black,
+     white and TekAIDA purple; it is now the product's own four colours.
 
-  --ink: var(--arctic);
-  --ground: var(--onyx);
-  --quiet: var(--steel);
-  /* One step off pure black for the few surfaces that need separating, rather
+     Burgundy is absent on purpose. It is the sheet's supporting colour for
+     secondary surfaces and alerts, and against this navy ground it is 1.5:1 —
+     two dark colours that read as one. It earns its place on the cream grounds
+     inside the app, not here.
+
+     Gold on this ground is 6.7:1, which is readable at any size, but it is held
+     to marks, rules and fills and one hover fill. Where a word needs emphasis
+     the page uses cream and weight, because the sheet's instruction is that
+     gold is an accent and not type. */
+  --navy: #101F3F;
+  --gold: #C9A227;
+  --cream: #F4EFE4;
+
+  --ink: var(--cream);
+  --ground: var(--navy);
+  --quiet: #B9C0D1;
+  /* One step off the ground for the few surfaces that need separating, rather
      than a card with a shadow under it. */
-  --raised: #0C0C0E;
-  --hairline: #26262B;
+  --raised: #17294C;
+  --hairline: #2E3E62;
 
   --measure: 34rem;
   --gutter: clamp(1rem, 5vw, 6rem);
@@ -115,14 +130,15 @@ p { margin: 0 0 1.1em; max-width: var(--measure); }
 a { color: inherit; }
 
 :focus-visible {
-  outline: 2px solid var(--blade);
+  outline: 2px solid var(--gold);
   outline-offset: 3px;
   border-radius: 1px;
 }
 
 .skip {
   position: absolute; left: -9999px;
-  background: var(--blade); color: var(--arctic);
+  /* Navy type on the gold, not cream: cream on gold is 2.1:1. */
+  background: var(--gold); color: var(--navy);
   padding: .6rem 1rem; z-index: 10;
 }
 .skip:focus { left: var(--gutter); top: .5rem; }
@@ -145,12 +161,12 @@ section + section { border-top: 1px solid var(--hairline); }
   font-weight: 400;
   line-height: 1.5;
   color: var(--quiet);
-  border-left: 2px solid var(--blade);
+  border-left: 2px solid var(--gold);
   padding-left: .7rem;
   margin: 1.1rem 0 0;
   max-width: 30rem;
 }
-.src b { font-weight: 600; color: #D8D8DE; }
+.src b { font-weight: 600; color: var(--cream); }
 
 /* ── hero ───────────────────────────────────────────────────────────────── */
 
@@ -158,14 +174,21 @@ section + section { border-top: 1px solid var(--hairline); }
 .hero h1 { max-width: 15ch; }
 .hero .lede { margin-top: 1.6rem; }
 
+/* The mark is the delivered artwork; the name beside it is live text in Cinzel
+   Bold, which is what the sheet specifies for the wordmark. Set as "RaiseRoom"
+   at the artwork's own tracking rather than the wide all-caps this page used
+   before, so the page and the logo file agree with each other. */
 .wordmark {
   font-family: Cinzel, Georgia, serif;
   font-weight: 700;
-  font-size: 1rem;
-  letter-spacing: .14em;
-  display: block;
+  font-size: 1.15rem;
+  letter-spacing: .014em;
+  display: flex;
+  align-items: center;
+  gap: .55rem;
   margin-bottom: clamp(2.5rem, 7vw, 5rem);
 }
+.wordmark img { display: block; width: 1.9rem; height: 1.9rem; }
 
 /* The figure card. The single most characteristic object in the product:
    a number that arrives with its evidence attached. */
@@ -174,7 +197,7 @@ section + section { border-top: 1px solid var(--hairline); }
   padding: 1.4rem 1.6rem;
   background: var(--raised);
   border: 1px solid var(--hairline);
-  border-left: 3px solid var(--blade);
+  border-left: 3px solid var(--gold);
   max-width: 27rem;
 }
 .figure-label {
@@ -196,16 +219,16 @@ section + section { border-top: 1px solid var(--hairline); }
 .button {
   font: 600 .95rem/1 Raleway, sans-serif;
   padding: .95rem 1.5rem;
-  border: 1px solid var(--blade);
-  background: var(--blade);
-  color: var(--arctic);
+  border: 1px solid var(--gold);
+  background: var(--gold);
+  color: var(--navy);
   text-decoration: none;
   display: inline-block;
   transition: background .15s ease, color .15s ease;
 }
-.button:hover { background: #8d52f5; }
+.button:hover { background: #D9B340; border-color: #D9B340; }
 .button-quiet { background: transparent; border-color: var(--hairline); color: var(--ink); }
-.button-quiet:hover { background: var(--raised); border-color: var(--steel); }
+.button-quiet:hover { background: var(--raised); border-color: var(--quiet); }
 
 .under-button { font-size: .82rem; color: var(--quiet); margin-top: 1rem; }
 
@@ -219,8 +242,11 @@ section + section { border-top: 1px solid var(--hairline); }
   font-variant-numeric: tabular-nums;
   font-size: 1.05rem;
 }
-.clash div:nth-child(2) span:last-child,
-.clash div:nth-child(3) span:last-child { color: var(--blade); }
+/* The two figures that disagree with the deck are marked with a gold rule down
+   their edge rather than by colouring the number. A figure is the one thing on
+   this page that has to be read exactly, and the accent is not a type colour. */
+.clash div:nth-child(2),
+.clash div:nth-child(3) { box-shadow: inset 2px 0 0 var(--gold); }
 
 /* ── lists that are not cards ───────────────────────────────────────────── */
 
@@ -235,7 +261,7 @@ section + section { border-top: 1px solid var(--hairline); }
 .numbered > div::before {
   counter-increment: n; content: counter(n, decimal-leading-zero);
   font-family: 'Source Code Pro', ui-monospace, monospace;
-  font-size: .78rem; color: var(--blade); padding-top: .3rem;
+  font-size: .78rem; color: var(--gold); padding-top: .3rem;
 }
 
 /* ── plans ──────────────────────────────────────────────────────────────── */
@@ -254,7 +280,7 @@ section + section { border-top: 1px solid var(--hairline); }
 .plan .alt { font-size: .8rem; color: var(--quiet); margin: .35rem 0 1.4rem; }
 .plan ul { list-style: none; padding: 0; margin: 0 0 1.6rem; font-size: .9rem; }
 .plan li { padding: .4rem 0 .4rem 1.1rem; position: relative; color: var(--quiet); }
-.plan li::before { content: ''; position: absolute; left: 0; top: .95em; width: .4rem; height: 1px; background: var(--blade); }
+.plan li::before { content: ''; position: absolute; left: 0; top: .95em; width: .4rem; height: 1px; background: var(--gold); }
 .plan .button { width: 100%; text-align: center; }
 
 /* ── the honesty block ──────────────────────────────────────────────────── */
@@ -274,7 +300,7 @@ summary {
   display: flex; justify-content: space-between; gap: 1rem; align-items: baseline;
 }
 summary::-webkit-details-marker { display: none; }
-summary::after { content: '+'; color: var(--blade); font-family: 'Source Code Pro', monospace; font-weight: 400; }
+summary::after { content: '+'; color: var(--gold); font-family: 'Source Code Pro', monospace; font-weight: 400; }
 details[open] summary::after { content: '–'; }
 details p { color: var(--quiet); font-size: .95rem; padding-bottom: .6rem; max-width: 40rem; }
 
@@ -297,7 +323,9 @@ footer nav { display: flex; flex-wrap: wrap; gap: 1.4rem; margin-bottom: 2rem; }
 
 <!-- ── hero ────────────────────────────────────────────────────────────── -->
 <section class="hero wrap">
-  <span class="wordmark">RAISEROOM</span>
+  <span class="wordmark">
+    <img src="/assets/brand/mark-gold-on-navy.svg" alt="" width="30" height="30">RaiseRoom
+  </span>
 
   <h1>Everything an investor will ask for — ready before they ask.</h1>
 
@@ -479,7 +507,8 @@ footer nav { display: flex; flex-wrap: wrap; gap: 1.4rem; margin-bottom: 2rem; }
         <li>No benchmark, no ranking, ever</li>
         <li>10 seats</li>
       </ul>
-      <a class="button button-quiet" href="/sign-up">Start 7-day trial</a>
+      <a class="button button-quiet" href="/sign-up">Create an account</a>
+      <p class="alt">Firm is set up with us — email support@raiseroom.app</p>
     </div>
   </div>
 
